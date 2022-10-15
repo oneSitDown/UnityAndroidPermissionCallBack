@@ -1,0 +1,46 @@
+plugins {
+    id 'com.android.library'
+}
+
+android {
+    compileSdk 30
+
+    defaultConfig {
+        minSdk 23
+        targetSdk 30
+        versionCode 1
+        versionName "1.0"
+        buildConfigField("String","sdkVersion","\""+getGitSHA()+"\"")
+
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+}
+
+
+
+task makeReleaseJar(type: Copy, dependsOn: ['assembleRelease']) {
+
+    def jarName = "AndroidPermission"+getGitSHA()+".jar"
+    def aarFile = file("${buildDir}/outputs/aar/u3d-release.aar")
+    def outputDir = file("${buildDir}/unpacked/dist")
+    from zipTree(aarFile)
+    into(outputDir)
+    def targetJar = file("${outputDir}/outputs/classes.jar")
+    from(targetJar)
+    include('classes.jar')
+    into("${buildDir}/jar/")
+    rename('classes.jar',jarName)
+    targetJar.delete()
+}
+
+
+static def getGitSHA() {
+    return /*'git rev-parse --short HEAD'.execute().text.trim()+"-"+*/"2.1.0."+new Date().format("yyMddHHmm", TimeZone.getTimeZone("GMT+08:00"))
+}
